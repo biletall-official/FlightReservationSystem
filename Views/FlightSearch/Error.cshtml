@@ -1,0 +1,8 @@
+<h2>Bir hata oluştu</h2>
+<p>Uçuş arama işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.</p>
+@if (Model != null && Model.ShowRequestId)
+{
+    <p>
+        <strong>Hata Takip Numarası:</strong> @Model.RequestId
+    </p>
+}

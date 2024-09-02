@@ -1,0 +1,62 @@
+@model UçakDemo.Services.InternationalSeferResponse
+
+{
+ViewData["Title"] = "International Sefer Listesi";
+}
+<h2>International Sefer Listesi</h2>
+
+@if (Model.InternationalSegmentler != null && Model.InternationalSegmentler.Any())
+{
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Firma Adı</th>
+            <th>Kalkış</th>
+            <th>Varış</th>
+            <th>Kalkış Tarihi</th>
+            <th>Varış Tarihi</th>
+            <th>Süre</th>
+            <th>Fiyat</th>
+            <th>Bagaj</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var segment in Model.InternationalSegmentler)
+        {
+            <tr>
+                <td>@segment.HavaYoluKod</td>
+                <td>@segment.KalkisKod</td>
+                <td>@segment.VarisKod</td>
+                <td>@segment.KalkisTarih.ToString("yyyy-MM-dd")</td>
+                <td>@segment.VarisTarih.ToString("yyyy-MM-dd")</td>
+                <td>@segment.</td>
+                <td>@segment.Vakit dakika</td>
+                <td>
+                    @if (Model.InternationalSecenekler.Any(s => s.ID == segment.SecenekID))
+                    {
+                        var secenek = Model.InternationalSecenekler.First(s => s.ID == segment.SecenekID);
+                        if (secenek != null)
+                        {
+                        @secenek.ToplamFiyatE.ToString("C")
+                        }
+                        else
+                        {
+                            <span class="text-danger">Fiyat bilgisi yok</span>
+                        }
+                    }
+                    }
+                    else
+                    {
+                    <span class="text-danger">Fiyat bilgisi yok</span>
+                    }
+                </td>
+                <td>@segment.FiyatPaketTanimi / @segment.FiyatPaketAnahtari</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Uygun sefer bulunamadı.</p>
+}

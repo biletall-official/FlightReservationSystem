@@ -1,0 +1,49 @@
+
+@model UçakDemo.Services.SeferResponse
+
+@{
+    ViewData["Title"] = "Sefer Listesi";
+}
+<h2>Sefer Listesi</h2>
+
+@if (Model.Segmentler != null && Model.Segmentler.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Firma Adı</th>
+                <th>Kalkış</th>
+                <th>Varış</th>
+                <th>Kalkış Tarihi</th>
+                <th>Varış Tarihi</th>
+                <th>Süre</th>
+                <th>Fiyat</th>
+                <th>Bagaj</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var segment in Model.Segmentler)
+        {
+            <tr>
+                <td>@segment.KalkisKod</td>
+                <td>@segment.VarisKod</td>
+                <td>@segment.KalkisTarih.ToString("yyyy-MM-dd")</td>
+                <td>@segment.VarisTarih.ToString("yyyy-MM-dd")</td>
+                <td>@segment.Vakit dakika</td>
+                <td>
+                    @if (Model.Secenekler.Any(s => s.ID == segment.SecenekID))
+                    {
+                        var secenek = Model.Secenekler.First(s => s.ID == segment.SecenekID);
+                        @secenek.ToplamFiyatP.ToString("C")
+                    }
+                </td>
+                <td>@segment.FiyatPaketAnahtari / @segment.FiyatPaketTanimi</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Uygun sefer bulunamadı.</p>
+}

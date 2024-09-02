@@ -1,0 +1,56 @@
+@model UçakDemo.Services.YurtdisiSeferListesi
+
+<h2>Yurtdisi Seferler</h2>
+
+@if (Model.InternationalSegmentler != null && Model.InternationalSegmentler.Any())
+{
+    <h3>Seferler</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Firma</th>
+            <th>Sefer No</th>
+            <th>Kalkış</th>
+            <th>Varış</th>
+            <th>Kalkış Şehir</th>
+            <th>Varış Şehir</th>
+            <th>Kalkış Havaalanı</th>
+            <th>Varış Havaalanı</th>
+            <th>Kalkış Tarih</th>
+            <th>Varış Tarih</th>
+            <th>Uçak Tipi</th>
+            <th>Sinif E</th>
+            <th>Sinif B</th>
+            <th>Koltuk E</th>
+            <th>Koltuk B</th>
+            <th>Bagaj E</th>
+            <th>Bagaj B</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var segment in Model.InternationalSegmentler)
+        {
+            <tr>
+                <td>@segment.HavaYolu</td>
+                <td>@segment.SeferNo</td>
+                <td>@segment.KalkisKod</td>
+                <td>@segment.VarisKod</td>
+                <td>@segment.KalkisSehir</td>
+                <td>@segment.VarisSehir</td>
+                <td>@segment.KalkisHavaalan</td>
+                <td>@segment.VarisHavaalan</td>
+                <td>@segment.KalkisTarih ("yyyy.MM.dd")</td>
+                <td>@segment.VarisTarih. ("yyyy.MM.dd")</td>
+                <td>@segment.Sinif</td>
+                <td>@segment.KalanKoltukSayi</td>
+                <td>@segment.FiyatPaketTanimi</td>
+                <td>@segment.FiyatPaketAnahtari</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Sefer bulunamadı.</p>
+}

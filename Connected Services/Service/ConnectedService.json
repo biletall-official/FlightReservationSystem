@@ -1,0 +1,15 @@
+{
+  "providerId": "Microsoft.Tools.ServiceModel.Svcutil",
+  "version": "2.1.0",
+  "ExtendedData": {
+    "inputs": [
+      "http://94.55.20.137/wstest/service.asmx"
+    ],
+    "namespaceMappings": [
+      "*, UçakDemo.Service"
+    ],
+    "outputFile": "Service.cs",
+    "targetFramework": "net8.0",
+    "typeReuseMode": "All"
+  }
+}
