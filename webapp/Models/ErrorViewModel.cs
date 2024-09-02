@@ -1,4 +1,4 @@
-namespace UçakDemo.Models;
+namespace webapp.Models;
 
 public class ErrorViewModel
 {
