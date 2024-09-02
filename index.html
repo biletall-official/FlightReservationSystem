@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uçak Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>Uçuş Noktası Seç</h1>
+<form>
+    <!-- Kalkış Noktası Seçimi -->
+    <div class="form-group">
+        <select id="KalkisAdi" name="KalkisAdi">
+            <option value="" disabled selected hidden>Nereden Seçin</option>
+            <option value="IST">Istanbul</option>
+            <option value="ESB">Ankara</option>
+            <option value="ADB">Izmir</option>
+            <option value="AYT">Antalya</option>
+        </select>
+    </div>
+
+    <!-- Varış Noktası Seçimi -->
+    <div class="form-group">
+        <select id="VarisAdi" name="VarisAdi">
+            <option value="" disabled selected hidden>Nereye Seçin</option>
+            <option value="IST">Istanbul</option>
+            <option value="ESB">Ankara</option>
+            <option value="ADB">Izmir</option>
+            <option value="AYT">Antalya</option>
+        </select>
+    </div>
+
+    <!-- Tarih Seçimi -->
+    <div class="form-group">
+        <div class="date-container">
+            <input type="date" id="Tarih" name="Tarih">
+        </div>
+    </div>
+
+    <!-- Yolcu Sayısı Butonu ve Kontrolleri -->
+    <div class="form-group">
+        <button type="button" id="toggle-passenger-controls" class="btn">Yolcu Sayısı</button>
+        <div class="passenger-controls" id="passenger-controls" style="display: none;">
+            <!-- Yetişkin Yolcu Sayısı -->
+            <div class="passenger-type">
+                <label for="Yetiskin">Yetişkin:</label>
+                <div>
+                    <button type="button" class="quantity-btn" data-action="decrease" data-target="Yetiskin">-</button>
+                    <span id="Yetiskin">1</span>
+                    <button type="button" class="quantity-btn" data-action="increase" data-target="Yetiskin">+</button>
+                </div>
+            </div>
+            <!-- Çocuk Yolcu Sayısı -->
+            <div class="passenger-type">
+                <label for="Cocuk">Çocuk:</label>
+                <div>
+                    <button type="button" class="quantity-btn" data-action="decrease" data-target="Cocuk">-</button>
+                    <span id="Cocuk">0</span>
+                    <button type="button" class="quantity-btn" data-action="increase" data-target="Cocuk">+</button>
+                </div>
+            </div>
+            <!-- Öğrenci Yolcu Sayısı -->
+            <div class="passenger-type">
+                <label for="Ogrenci">Öğrenci:</label>
+                <div>
+                    <button type="button" class="quantity-btn" data-action="decrease" data-target="Ogrenci">-</button>
+                    <span id="Ogrenci">0</span>
+                    <button type="button" class="quantity-btn" data-action="increase" data-target="Ogrenci">+</button>
+                </div>
+            </div>
+            <!-- 65 Yaş Üzeri Yolcu Sayısı -->
+            <div class="passenger-type">
+                <label for="65YasUzeri">65 Yaş Üzeri:</label>
+                <div>
+                    <button type="button" class="quantity-btn" data-action="decrease" data-target="65YasUzeri">-</button>
+                    <span id="65YasUzeri">0</span>
+                    <button type="button" class="quantity-btn" data-action="increase" data-target="65YasUzeri">+</button>
+                </div>
+            </div>
+            <!-- Bebek Yolcu Sayısı -->
+            <div class="passenger-type">
+                <label for="Bebek">Bebek:</label>
+                <div>
+                    <button type="button" class="quantity-btn" data-action="decrease" data-target="Bebek">-</button>
+                    <span id="Bebek">0</span>
+                    <button type="button" class="quantity-btn" data-action="increase" data-target="Bebek">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleButton = document.getElementById('toggle-passenger-controls');
+        const controls = document.getElementById('passenger-controls');
+        let isVisible = false;
+
+        // Yolcu Kontrollerini Göster/Gizle
+        toggleButton.addEventListener('click', function () {
+            isVisible = !isVisible;
+            controls.style.display = isVisible ? 'block' : 'none';
+        });
+
+        const quantityButtons = document.querySelectorAll('.quantity-btn');
+
+        // Yolcu Sayısını Artırma/Azaltma İşlemleri
+        quantityButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const action = this.dataset.action;
+                const targetId = this.dataset.target;
+                const targetElement = document.getElementById(targetId);
+                let value = parseInt(targetElement.textContent);
+
+                if (action === 'increase') {
+                    if (targetId === 'Bebek' && value < 4) {
+                        value++;
+                    } else if (targetId !== 'Bebek' && value < 4) {
+                        value++;
+                    }
+                } else if (action === 'decrease') {
+                    if (targetId === 'Bebek' && value > 0) {
+                        value--;
+                    } else if (targetId !== 'Bebek' && value > 1) {
+                        value--;
+                    }
+                }
+                targetElement.textContent = value;
+
+                validatePassengerCounts();
+            });
+        });
+
+        // Yolcu Sayısı Validasyonları
+        function validatePassengerCounts() {
+            const yetiskin = parseInt(document.getElementById('Yetiskin').textContent);
+            const cocuk = parseInt(document.getElementById('Cocuk').textContent);
+            const ogrenci = parseInt(document.getElementById('Ogrenci').textContent);
+            const yasUzeri = parseInt(document.getElementById('65YasUzeri').textContent);
+            const bebek = parseInt(document.getElementById('Bebek').textContent);
+
+            const totalPassengers = yetiskin + cocuk + ogrenci + yasUzeri + bebek;
+            const totalAdults = yetiskin + yasUzeri + ogrenci +cocuk;
+
+            if (totalAdults > 4) {
+                alert('Yetişkin, Çocuk, Öğrenci ve 65 Yaş Üzeri yolcuların toplamı 4 veya daha az olmalıdır.');
+            }
+
+            if (totalAdults < bebek) {
+                alert('En az 1 yetişkin veya 65 yaş üstü yolcu olmalıdır.');
+            }
+
+            if (bebek < 0 || bebek > 4) {
+                alert('Bebek sayısı 0 ile 4 arasında olmalıdır.');
+            }
+
+            if (totalPassengers > 8) {
+                alert('Toplam yolcu sayısı 8 veya daha az olmalıdır.');
+            }
+
+            if (yetiskin + yasUzeri < 1) {
+                alert('En az 1 yetişkin veya 65 yaş üzeri yolcu olmalıdır.');
+            }
+            
+        }
+    });
+</script>
+</body>
+</html>
