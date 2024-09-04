@@ -2,7 +2,7 @@ namespace UçakDemo.Models.Sefer;
 
 public class Segment
 {
-    public int ID { get; set; }
+    public int ID { get; set; } = 1000;
     public int SecenekID { get; set; }
     public string HavaYolu { get; set; }
     public string SeferNo { get; set; }

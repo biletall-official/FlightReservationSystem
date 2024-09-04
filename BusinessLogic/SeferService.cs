@@ -4,6 +4,7 @@ using System.Xml;
 using System.Data;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
+using System.Xml.Serialization;
 using UçakDemo.Models;
 using UçakDemo.Models.InternationalSefer;
 using UçakDemo.Models.Sefer;
@@ -46,6 +47,34 @@ namespace UçakDemo.Services
                 Secenekler = new List<Models.Sefer.Secenek>(),
             };
 
+            foreach (var seferElement in element.Descendants("Secenekler"))
+            {
+                try
+                {
+                    var secenek = new Models.Sefer.Secenek
+                    {
+
+                        ID = int.Parse(seferElement.Element("ID")?.Value),
+                        FirmaNo = int.Parse(seferElement.Element("FirmaNo")?.Value),
+                        FiyatP = decimal.Parse(seferElement.Element("FiytP")?.Value),
+                        FiyatE = decimal.Parse(seferElement.Element("FiyatE")?.Value),
+                        FiyatB = decimal.Parse(seferElement.Element("FiyatB")?.Value),
+                        ServisUcretP = decimal.Parse(seferElement.Element("ServisUcretP")?.Value),
+                        ServisUcretE = decimal.Parse(seferElement.Element("ServisUcretE")?.Value),
+                        ServisUcretB = decimal.Parse(seferElement.Element("ServisUcretB")?.Value),
+                        ToplamFiyatP = decimal.Parse(seferElement.Element("ToplamFiyatP")?.Value),
+                        ToplamFiyatE = decimal.Parse(seferElement.Element("ToplamFiyatE")?.Value),
+                        BagajP = seferElement.Element("BagajP")?.Value,
+                        BagajE = seferElement.Element("BagajE")?.Value,
+                        Vakit = seferElement.Element("Vakit")?.Value,
+                    };
+                    sefer.Secenekler.Add(secenek);
+                }
+                catch (Exception e)
+                {
+                    
+                }
+            }
             foreach (var segmentElement in element.Descendants("Segmentler"))
             {
                 try
@@ -77,33 +106,12 @@ namespace UçakDemo.Services
                     throw;
                 }
             }
-
-            foreach (var seferElement in element.Descendants("Secenek"))
+            foreach (var secenek in sefer.Secenekler)
             {
-                try
+                var ilgiliSegmentler = sefer.Segmentler.Where(s => s.SecenekID == secenek.ID).ToList();
+                if (ilgiliSegmentler.Count > 1)
                 {
-                    var secenek = new Models.Sefer.Secenek
-                    {
-
-                        ID = int.Parse(seferElement.Element("ID")?.Value),
-                        FirmaNo = int.Parse(seferElement.Element("FirmaNo")?.Value),
-                        FiyatP = decimal.Parse(seferElement.Element("FiytP")?.Value),
-                        FiyatE = decimal.Parse(seferElement.Element("FiyatE")?.Value),
-                        FiyatB = decimal.Parse(seferElement.Element("FiyatB")?.Value),
-                        ServisUcretP = decimal.Parse(seferElement.Element("ServisUcretP")?.Value),
-                        ServisUcretE = decimal.Parse(seferElement.Element("ServisUcretE")?.Value),
-                        ServisUcretB = decimal.Parse(seferElement.Element("ServisUcretB")?.Value),
-                        ToplamFiyatP = decimal.Parse(seferElement.Element("ToplamFiyatP")?.Value),
-                        ToplamFiyatE = decimal.Parse(seferElement.Element("ToplamFiyatE")?.Value),
-                        BagajP = seferElement.Element("BagajP")?.Value,
-                        BagajE = seferElement.Element("BagajE")?.Value,
-                        Vakit = seferElement.Element("Vakit")?.Value,
-                    };
-                    sefer.Secenekler.Add(secenek);
-                }
-                catch (Exception e)
-                {
-                    
+                    var aktarmaliSefer = string.Join(" -> ", ilgiliSegmentler.Select(s => $"{s.KalkisKod}-{s.VarisKod}"));
                 }
             }
             return sefer;
@@ -119,31 +127,57 @@ namespace UçakDemo.Services
                     InternationalSecenekler = new List<Secenek>(),
                 };
 
-                foreach (var segmentElement in element.Descendants("**InternationalSegment"))
+                foreach (var seferElement in element.Descendants("Secenekler"))
+                {
+                    try
+                    {
+                        var Internationalsecenek = new Secenek
+                        {
+
+                            ID = int.Parse(seferElement.Element("ID")?.Value),
+                            FirmaNo = int.Parse(seferElement.Element("FirmaNo")?.Value),
+                            VFiyat = decimal.Parse(seferElement.Element("VFiyat")?.Value),
+                            NFiyat = decimal.Parse(seferElement.Element("NFiyat")?.Value),
+                            Vakit = seferElement.Element("Vakit")?.Value,
+                            //ToplamFiyatE = decimal.Parse(seferElement.Element("ToplamFiyatE")?.Value),
+                        };
+                        Internationalsefer.InternationalSecenekler.Add(Internationalsecenek);
+                    }
+                    catch (Exception e)
+                    {
+                        
+                    }
+                }
+                foreach (var segmentElement in element.Descendants("Segmentler"))
                 {
                     try
                     {
                         var Internationalsegment = new Segment
                         {
                             ID = int.Parse(segmentElement.Element("ID")?.Value),
+                            UcusID = int.Parse(segmentElement.Element("UcusID")?.Value ?? "0"),
                             SecenekID = int.Parse(segmentElement.Element("SecenekID")?.Value),
-                            HavaYolu = segmentElement.Element("Firma")?.Value,
-                            HavaYoluKod = segmentElement.Element("FirmaAd")?.Value,
+                            HavaYolu = segmentElement.Element("HavaYolu")?.Value,
+                            HavaYoluKod = segmentElement.Element("HavaYoluKod")?.Value,
                             GercekTFAciklama = segmentElement.Element("GercekTFAciklama")?.Value,
-                            SeferNo = segmentElement.Element("SeferNo")?.Value,
-                            KalkisKod = segmentElement.Element("Kalkis")?.Value,
-                            VarisKod = segmentElement.Element("Varis")?.Value,
+                            FirmaSeferNo = segmentElement.Element("SeferNo")?.Value,
+                            KalkisKod = segmentElement.Element("KalkisKod")?.Value,
+                            VarisKod = segmentElement.Element("VarisKod")?.Value,
                             KalkisSehir = segmentElement.Element("KalkisSehir")?.Value,
                             VarisSehir = segmentElement.Element("VarisSehir")?.Value,
-                            KalkisHavaalan = segmentElement.Element("KalkisHavaalan")?.Value,
-                            VarisHavaalan = segmentElement.Element("VarisHavaalan")?.Value,
                             KalkisTarih = Convert.ToDateTime(segmentElement.Element("KalkisTarih")?.Value),
                             VarisTarih = Convert.ToDateTime(segmentElement.Element("VarisTarih")?.Value),
-                            Vakit = int.Parse(segmentElement.Element("Sure")?.Value),
-                            Sinif = segmentElement.Element("SinifE").Value,
-                            KalanKoltukSayi = int.Parse(segmentElement.Element("KoltukE")?.Value),
-                            FiyatPaketTanimi = segmentElement.Element("BagajE")?.Value,
-                            FiyatPaketAnahtari = segmentElement.Element("BagajB")?.Value,
+                            Vakit = segmentElement.Element("Vakit")?.Value,
+                            Sinif = segmentElement.Element("Sinif").Value,
+                            KalanKoltukSayi = int.Parse(segmentElement.Element("KalanKoltukSayi")?.Value),
+                            SeferNo = int.Parse(segmentElement.Element("SeferNo")?.Value),
+                            UcusSuresi = int.Parse(segmentElement.Element("UcusSuresi")?.Value),
+                            SinifTip = segmentElement.Element("SinifTip")?.Value,
+                            ToplamSeyahatSuresi = int.Parse(segmentElement.Element("ToplamSeyahatSuresi")?.Value),
+                            //SeferKod = int.Parse(segmentElement.Element("SeferKod")?.Value),
+                           //Bagaj = segmentElement.Element("Bagaj")?.Value,
+                            
+                            
                         };
                         Internationalsefer.InternationalSegmentler.Add(Internationalsegment);
                     }
@@ -153,25 +187,15 @@ namespace UçakDemo.Services
                         throw;
                     }
                 }
-
-                foreach (var seferElement in element.Descendants("InternationalSecenek"))
+                foreach (var secenek in Internationalsefer.InternationalSecenekler)
                 {
-                    try
+                    var ilgiliSegmentler = Internationalsefer.InternationalSegmentler
+                        .Where(s => s.SecenekID == secenek.ID)
+                        .ToList();
+                    if (ilgiliSegmentler.Count > 1)
                     {
-                        var Internationalsecenek = new Secenek
-                        {
-
-                            ID = int.Parse(seferElement.Element("ID")?.Value),
-                            FirmaNo = int.Parse(seferElement.Element("FirmaNo")?.Value),
-                            VFiyat = decimal.Parse(seferElement.Element("FiytP")?.Value),
-                            NFiyat = decimal.Parse(seferElement.Element("NFiyat")?.Value),
-                            Vakit = seferElement.Element("Vakit")?.Value,
-                        };
-                        Internationalsefer.InternationalSecenekler.Add(Internationalsecenek);
-                    }
-                    catch (Exception e)
-                    {
-                        
+                        var aktarmaliSefer = string.Join(" -> ", ilgiliSegmentler
+                            .Select(s => $"{s.KalkisKod}-{s.VarisKod}"));
                     }
                 }
                 return Internationalsefer;

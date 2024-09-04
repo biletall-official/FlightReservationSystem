@@ -10,13 +10,14 @@ namespace UçakDemo.Controllers;
 
 public class FlightController : Controller
 {
-
     private readonly SeferService _seferService;
 
     public FlightController(SeferService seferService)
     {
+        
         _seferService = seferService;
     }
+    
     public async Task<IActionResult> Index(int YetiskinSayi,string KalkisAdi, string VarisAdi,DateTime Tarih, string UcusTuru)
     {
         if (ModelState.IsValid)
@@ -59,6 +60,7 @@ public class FlightController : Controller
                     ModelState.AddModelError("", "Sefer bulunamadı.");
                     return View("Error");
                 }
+                
                 var yurtdisiSeferListesi = new YurtdisiSeferListesi
                 {
                     InternationalSegmentler = internationalSeferResponse.InternationalSegmentler,
@@ -129,7 +131,7 @@ public class FlightController : Controller
     }
     
     //flight/getinternationalseferler
-    public async Task<IActionResult> GetInternationalSeferler()
+    public async Task<IActionResult> GetInternationalSeferler( string FirmaAdı , string KalkisAdi , string VarisAdi)
     {
         var ınternationalSeferRequest = new InternationalSeferRequest() 
         {
@@ -142,5 +144,28 @@ public class FlightController : Controller
         return Ok(ınternationalseferResponse);
 
     }
+    [HttpPost]
+    public async Task<IActionResult> ValidatePrice(int ucusId, decimal mevcutFiyat)
+    {
+        try
+        {
+            var internationalSefer = await _seferService.GetInternationalSeferler(new InternationalSeferRequest());
+            
+            var secenek = internationalSefer.InternationalSecenekler.FirstOrDefault(s => s.ID == ucusId);
+                
+            if (secenek != null)
+            {
+                var isValid = secenek.ToplamFiyatE == mevcutFiyat;
+                return Json(new { isValid });
+            }
+
+            return Json(new { isValid = false });
+        }
+        catch (Exception ex)
+        {
+            return Json(new { isValid = false, message = ex.Message });
+        }
+    }
+
 
 }

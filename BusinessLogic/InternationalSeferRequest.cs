@@ -2,6 +2,7 @@ namespace UçakDemo.Services;
 
 public class InternationalSeferRequest
 {
+    public int UcusID { get; set; }
     public int FirmaNo { get; set; } = 1100;
     public string KalkisAdi { get; set; }
     public string VarisAdi { get; set; }

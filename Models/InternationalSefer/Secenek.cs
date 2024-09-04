@@ -7,7 +7,10 @@ public class Secenek
     public decimal VFiyat { get; set; }
     public decimal NFiyat { get; set; }
     public decimal FiyatB { get; set; }
-    public decimal ToplamFiyatE { get; set; }
+    public decimal ToplamFiyatE 
+    {
+        get { return VFiyat + NFiyat; }
+    }
     public string BagajP { get; set; }
     public string BagajE { get; set; }
     public string Vakit { get; set; }
