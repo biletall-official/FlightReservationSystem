@@ -39,10 +39,43 @@
                             <span>Kalan @firstSegment?.KalanKoltukSayi Koltuk </span>
                         </div>
                     </div>
-                    <div style="margin-left: 40px; border: 2px solid red; padding: 10px; display: inline-block; color: red;cursor: pointer;">
-                        <div onclick="validatePrice(@firstSegment?.UcusID, @ucret?.ToplamFiyatE)">
-                            <span>@ucret?.ToplamFiyatE TL </span>
+                    <div style="margin-left: 40px; cursor: pointer;">
+                        <div style="border: 2px solid red; padding: 10px; display: inline-block; color: red;">
+                            <div onclick="validatePrice(@firstSegment?.UcusID, @ucret?.ToplamFiyatE)">
+                                <span>@ucret?.ToplamFiyatE TL </span><br/>
+                            </div>
                         </div>
+                        <div style="cursor: pointer; margin-top: 10px;" onclick="toggleDetails('detailsPanel_@ucus.Key')">
+                            <span>Detaylı Bilgi</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="detailsPanel_@ucus.Key" class="details-panel">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Detaylı Bilgi</h3>
+                        <button onclick="toggleDetails('detailsPanel_@ucus.Key')" style="background: none; border: none; font-size: 20px; cursor: pointer;">&#10006;</button>
+                    </div>
+                    <div>
+                        @foreach (var segment in ucus)
+                        {
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>@segment.HavaYolu</strong><br/>
+                                @($"{segment.KalkisTarih:dd MMM ddd} - {segment.KalkisTarih:HH:mm}") - @segment.KalkisSehir - @segment.KalkisKod <br/>
+                                @($"{segment.VarisTarih:dd MMM ddd} - {segment.VarisTarih:HH:mm}") - @segment.VarisSehir - @segment.VarisKod
+                            </div>
+                            <div style="text-align: right;">
+                                <span>Sadece El Bagajı</span><br/>
+                                Uçuş No: @segment.UcusID Sınıf: @segment.Sinif
+                            </div>
+                        </div>
+                        @if (segment != lastSegment)
+                        {
+                        <div style="color: red; text-align: center; margin: 10px 0;">
+                            @($"Bekleme süresi: {segment.VarisTarih.AddHours(8).ToString("HH:mm")}")
+                        </div>
+                        }
+                        }
                     </div>
                 </div>
             </div>
@@ -77,5 +110,63 @@ else
                 }
             });
         }
+        function toggleDetails(panelId) {
+            var detailsPanel = document.getElementById(panelId);
+            if (detailsPanel.style.display === 'none' || detailsPanel.style.display === '') {
+                detailsPanel.style.display = 'block';
+            } else {
+                detailsPanel.style.display = 'none';
+            }
+        }
     </script>
 }
+
+<style>
+    .details-panel {
+        display: none;
+        position: absolute;
+        width: 100%;
+        background-color: white;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        z-index: 1000;
+    }
+</style>
+@*ucakdemo
+-bussineslogic 
+--havanoktaservice
+--ınternationalseferrequest
+--ınternatıonalseferresponse
+--seferrequest
+--seferresponse
+--seferservice
+-controllers
+--flightcontroller
+--havanoktacontroller
+--homecontroller
+-models
+--ınternatıonalsefer
+---secenek
+---segment
+---yurtdısıseferlistesi
+--sefer
+---secenek
+---segment
+---yurticiseferlistesi
+--errorviewmodel
+--flightsearchresultmodel
+--havanokta
+-views
+--flight
+---yurtdisiseferlistesi
+---yurticiseferlistesi
+--flightsearch
+---error
+---searchresult
+--havanokta
+---gethavanoktalar
+--home
+---ındex
+--sefer
+---getseferler
