@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Data;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using UçakDemo.BusinessLogic;
 using UçakDemo.Models;
 using UçakDemo.Models.InternationalSefer;
 using UçakDemo.Models.Sefer;
@@ -35,6 +37,7 @@ namespace UçakDemo.Services
             var internationalsefer = ParseInternationalSeferler(xmlResponse);
             return internationalsefer;
         }
+
 
         private SeferResponse ParseSeferler(string xml)
         {
@@ -136,10 +139,10 @@ namespace UçakDemo.Services
 
                             ID = int.Parse(seferElement.Element("ID")?.Value),
                             FirmaNo = int.Parse(seferElement.Element("FirmaNo")?.Value),
-                            VFiyat = decimal.Parse(seferElement.Element("VFiyat")?.Value),
-                            NFiyat = decimal.Parse(seferElement.Element("NFiyat")?.Value),
+                            VFiyat = decimal.Parse(seferElement.Element("VFiyat")?.Value,new CultureInfo("en-US")),
+                            NFiyat = decimal.Parse(seferElement.Element("NFiyat")?.Value,new CultureInfo("en-US")),
                             Vakit = seferElement.Element("Vakit")?.Value,
-                            //ToplamFiyatE = decimal.Parse(seferElement.Element("ToplamFiyatE")?.Value),
+
                         };
                         Internationalsefer.InternationalSecenekler.Add(Internationalsecenek);
                     }
@@ -174,9 +177,7 @@ namespace UçakDemo.Services
                             UcusSuresi = int.Parse(segmentElement.Element("UcusSuresi")?.Value),
                             SinifTip = segmentElement.Element("SinifTip")?.Value,
                             ToplamSeyahatSuresi = int.Parse(segmentElement.Element("ToplamSeyahatSuresi")?.Value),
-                            //SeferKod = int.Parse(segmentElement.Element("SeferKod")?.Value),
-                           //Bagaj = segmentElement.Element("Bagaj")?.Value,
-                            
+   
                             
                         };
                         Internationalsefer.InternationalSegmentler.Add(Internationalsegment);
@@ -200,5 +201,6 @@ namespace UçakDemo.Services
                 }
                 return Internationalsefer;
             }
+        
     };
 }

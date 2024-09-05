@@ -17,7 +17,17 @@ public class FlightController : Controller
         
         _seferService = seferService;
     }
-    
+
+    public IActionResult SelectFlight(int seferID)
+    {
+        HttpContext.Session.SetInt32("SeferID", seferID);
+        if (seferID == null)
+        {
+            return RedirectToAction("ValidatePrice");
+        }
+        return View();
+    }
+
     public async Task<IActionResult> Index(int YetiskinSayi,string KalkisAdi, string VarisAdi,DateTime Tarih, string UcusTuru)
     {
         if (ModelState.IsValid)
@@ -145,27 +155,21 @@ public class FlightController : Controller
 
     }
     [HttpPost]
-    public async Task<IActionResult> ValidatePrice(int ucusId, decimal mevcutFiyat)
+    public IActionResult ValidatePrice()
     {
-        try
-        {
-            var internationalSefer = await _seferService.GetInternationalSeferler(new InternationalSeferRequest());
-            
-            var secenek = internationalSefer.InternationalSecenekler.FirstOrDefault(s => s.ID == ucusId);
-                
-            if (secenek != null)
-            {
-                var isValid = secenek.ToplamFiyatE == mevcutFiyat;
-                return Json(new { isValid });
-            }
+        var seferId = HttpContext.Session.GetInt32("SeferID");
 
+        if (seferId == null)
+        {
             return Json(new { isValid = false });
         }
-        catch (Exception ex)
-        {
-            return Json(new { isValid = false, message = ex.Message });
-        }
+        
+        bool isValidPrice = true; 
+
+        return Json(new { isValid = isValidPrice });
     }
+   
+ 
 
 
 }

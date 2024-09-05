@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Configuration;
+using UçakDemo.Models;
 using UçakDemo.Services;
 
 
@@ -47,7 +48,7 @@ namespace ucakdemo.Services
             var response = await _httpClient.PostAsync("/wstest/service.asmx", content);
             return await response.Content.ReadAsStringAsync();
         }
-        
+
         public async Task<string> SearchFlightsAsync(SeferRequest seferRequest)
         {
             var kullaniciAdi = _configuration["BiletallService:KullaniciAdi"];
@@ -84,11 +85,12 @@ namespace ucakdemo.Services
                         </XmlIslet>
                     </soap:Body>
                 </soap:Envelope>";
-            
+
             var content = new StringContent(soapRequest, System.Text.Encoding.UTF8, "text/xml");
             var response = await _httpClient.PostAsync("/wstest/service.asmx", content);
             return await response.Content.ReadAsStringAsync();
         }
+
         public async Task<string> SearchInternationalFlightsAsync(InternationalSeferRequest ınternationalSeferRequest)
         {
             var kullaniciAdi = _configuration["BiletallService:KullaniciAdi"];
@@ -121,13 +123,15 @@ namespace ucakdemo.Services
                         </XmlIslet>
                     </soap:Body>
                 </soap:Envelope>";
-            
+
             var content = new StringContent(soapRequest, System.Text.Encoding.UTF8, "text/xml");
             var response = await _httpClient.PostAsync("/wstest/service.asmx", content);
             var readAsStringAsync = await response.Content.ReadAsStringAsync();
             return readAsStringAsync;
         }
-        
+
     }
 }
-    
+
+
+        

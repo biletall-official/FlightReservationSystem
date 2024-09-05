@@ -41,7 +41,7 @@
                     </div>
                     <div style="margin-left: 40px; cursor: pointer;">
                         <div style="border: 2px solid red; padding: 10px; display: inline-block; color: red;">
-                            <div onclick="validatePrice(@firstSegment?.UcusID, @ucret?.ToplamFiyatE)">
+                            <div onclick="validatePrice(@firstSegment.UcusID, @ucret.ToplamFiyatE, '@firstSegment.KalkisSehir', '@lastSegment.VarisSehir')">
                                 <span>@ucret?.ToplamFiyatE TL </span><br/>
                             </div>
                         </div>
@@ -88,38 +88,40 @@ else
 }
 @section Scripts
 {
-    <script>
-        function validatePrice(ucusID,mevcutFiyat){
-        $.ajax({
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function () {
+ 
+        $("#validatePriceBtn").click(function () {
+     
+            $.ajax({
                 url: '/Flight/ValidatePrice',
                 type: 'POST',
-                data: {
-                    ucusId: ucusId,
-                    mevcutFiyat: mevcutFiyat
-                },
                 success: function (response) {
                     if (response.isValid) {
-                        
-                        window.location.href = '/PassengerInfo?ucusID=' + ucusID;
+                 
+                        window.location.href = '/PassengerInfo';
                     } else {
-                        alert('Fiyat doğrulama başarısız oldu!');
+                        alert('Fiyat geçersiz.');
                     }
                 },
                 error: function () {
-                    alert('Bir hata oluştu!');
+                    alert('Bir hata oluştu.');
                 }
             });
+        });
+    });
+    function toggleDetails(panelId) {
+        var detailsPanel = document.getElementById(panelId);
+        if (detailsPanel.style.display === 'none' || detailsPanel.style.display === '') {
+            detailsPanel.style.display = 'block';
+        } else {
+            detailsPanel.style.display = 'none';
         }
-        function toggleDetails(panelId) {
-            var detailsPanel = document.getElementById(panelId);
-            if (detailsPanel.style.display === 'none' || detailsPanel.style.display === '') {
-                detailsPanel.style.display = 'block';
-            } else {
-                detailsPanel.style.display = 'none';
-            }
-        }
-    </script>
+    }
+</script>
 }
+<button id="validatePriceBtn">Fiyatı Doğrula ve Devam Et</button>
 
 <style>
     .details-panel {
@@ -133,40 +135,3 @@ else
         z-index: 1000;
     }
 </style>
-@*ucakdemo
--bussineslogic 
---havanoktaservice
---ınternationalseferrequest
---ınternatıonalseferresponse
---seferrequest
---seferresponse
---seferservice
--controllers
---flightcontroller
---havanoktacontroller
---homecontroller
--models
---ınternatıonalsefer
----secenek
----segment
----yurtdısıseferlistesi
---sefer
----secenek
----segment
----yurticiseferlistesi
---errorviewmodel
---flightsearchresultmodel
---havanokta
--views
---flight
----yurtdisiseferlistesi
----yurticiseferlistesi
---flightsearch
----error
----searchresult
---havanokta
----gethavanoktalar
---home
----ındex
---sefer
----getseferler
