@@ -24,24 +24,6 @@ public class Segment
     public int UcusSuresi { get; set; }
     public int ToplamSeyahatSuresi { get; set; }
     public string SinifTip { get; set; }
-   // public int SeferKod { get; set; }
-    //public string Bagaj { get; set; }
+    public decimal Fiyat { get; set; }
+  
 }
-//  <Segmentler>
-//                       <FirmaID>1106</FirmaID>
-//                       <Aktarma>false</Aktarma>
-//                    
-
-//                       <KalkisUlkeID>0</KalkisUlkeID>
-//                       <KalkisUlke>Yunanistan</KalkisUlke>
-//                       <KalkisHavaAlani>Eleftherios Venizelos Intl Arpt</KalkisHavaAlani>
-//                       <VarisUlkeID>0</VarisUlkeID>
-//                       <VarisUlke>Almanya</VarisUlke>
-//                       <VarisHavaAlani>Munich Intl Arpt</VarisHavaAlani>
-//                       <UcakTip>Airbus A320neo</UcakTip>
-//                       <KoridorSayi>1</KoridorSayi>
-//                       <KatSayi>1</KatSayi>
-//                       <KoltukMesafe>76</KoltukMesafe>
-//                       <KuralAnahtar>KmgqMFVqWDKAaD5RpAAAAA==,gws-eJxNTkEKwzAMe0zR3cmSrb2lJC0brN6gHayX/f8ZlRMKM9iWLSE7peTFBxnEp//o8OvGC/STAYVnLoShF4HjsEPERbx1fn7XDLNw3JDRyrbuqq5cS2RDDnNslAX2Wh/rRk6qsZiDHYZBLnCC6U6oY9leWiLVgzS51Rv45wE1yisJ</KuralAnahtar>
-//                       <FiyatPaketTanimi/>
-//                       <FiyatPaketAnahtari/>

@@ -5,27 +5,23 @@ using ucakdemo.Services;
 using UçakDemo.Services;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using UçakDemo.Models.InternationalSefer;
+using System.Net.Http.Json;
+using UçakDemo.BusinessLogic; 
 namespace UçakDemo.Controllers;
 
 public class FlightController : Controller
 {
     private readonly SeferService _seferService;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public FlightController(SeferService seferService)
+    public FlightController(SeferService seferService, IHttpClientFactory httpClientFactory)
+
     {
-        
         _seferService = seferService;
-    }
-
-    public IActionResult SelectFlight(int seferID)
-    {
-        HttpContext.Session.SetInt32("SeferID", seferID);
-        if (seferID == null)
-        {
-            return RedirectToAction("ValidatePrice");
-        }
-        return View();
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<IActionResult> Index(int YetiskinSayi,string KalkisAdi, string VarisAdi,DateTime Tarih, string UcusTuru)
@@ -76,6 +72,7 @@ public class FlightController : Controller
                     InternationalSegmentler = internationalSeferResponse.InternationalSegmentler,
                     InternationalSecenekler = internationalSeferResponse.InternationalSecenekler
                 };
+                HttpContext.Session.SetObject("SelectedSefer", internationalSeferResponse);
                 return View("YurtdisiSeferListesi", yurtdisiSeferListesi);
             }
         }
@@ -89,7 +86,7 @@ public class FlightController : Controller
         };
         return View(errorModel);
     }
-
+    [HttpPost]
     public async Task<IActionResult> InternationalFlightSearch(InternationalSeferRequest request)
     {
         var internationalSeferResponse = await _seferService.GetInternationalSeferler(request);
@@ -118,57 +115,54 @@ public class FlightController : Controller
             };
 
             var seferResponse = await _seferService.GetSeferListesi(seferRequest);
+            //HttpContext.Session.SetObject("SelectedSefer", seferResponse);
 
             return View("SeferListesi", seferResponse);
         }
         return View("Index", model);
     }
 
-    //flight/getseferler
     [HttpPost]
-    public async Task<IActionResult> GetSeferler( string FirmaAdı , string KalkisAdi ,string VarisAdi)
+    public async Task<IActionResult> ValidatePrice(int ucusID,decimal fiyat)
     {
-      
-        var seferRequest = new SeferRequest()
-        {
-            YetiskinSayi = 1,
-            KalkisAdi = "IST",
-            VarisAdi = "ASR",
-            Tarih = DateTime.Parse("2024-09-20"),
-        };
-        var seferResponse = await _seferService.GetSeferListesi(seferRequest);
-        return Ok(seferResponse);
-    }
-    
-    //flight/getinternationalseferler
-    public async Task<IActionResult> GetInternationalSeferler( string FirmaAdı , string KalkisAdi , string VarisAdi)
-    {
-        var ınternationalSeferRequest = new InternationalSeferRequest() 
-        {
-                YetiskinSayi = 1,
-                KalkisAdi = "IST",
-                VarisAdi = "LHR", 
-                Tarih= DateTime.Parse("2024-09-20"), 
-        };
-        var ınternationalseferResponse = await _seferService.GetInternationalSeferler(ınternationalSeferRequest);
-        return Ok(ınternationalseferResponse);
-
-    }
-    [HttpPost]
-    public IActionResult ValidatePrice()
-    {
-        var seferId = HttpContext.Session.GetInt32("SeferID");
-
-        if (seferId == null)
+        var selectedSefer = HttpContext.Session.GetObject<Segment>("SelectedSefer");
+        if (selectedSefer == null)
         {
             return Json(new { isValid = false });
         }
-        
-        bool isValidPrice = true; 
 
-        return Json(new { isValid = isValidPrice });
+        var ucusFiyatRequest = new UcusFiyatRequest
+        {
+            SeferID = ucusID,
+            Fiyat = fiyat, 
+            
+        };
+
+        var client = _httpClientFactory.CreateClient("FlightServiceClient");
+        var response = await client.PostAsJsonAsync("/api/flight/price", ucusFiyatRequest);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var fiyatVeKurallar = await response.Content.ReadFromJsonAsync<FiyatVeKurallarResponse>();
+            HttpContext.Session.SetObject("FiyatVeKurallar", fiyatVeKurallar);
+            return Json(new { isValid = true });
+        }
+        else
+        {
+            return Json(new { isValid = false });
+        }
     }
-   
+
+    [HttpPost]
+    public IActionResult SelectFlight(int seferID)
+    {
+        HttpContext.Session.SetInt32("SeferID", seferID);
+        if (seferID == null)
+        {
+            return RedirectToAction("ValidatePrice");
+        }
+        return View();
+    }
  
 
 

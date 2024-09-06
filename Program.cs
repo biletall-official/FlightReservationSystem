@@ -6,6 +6,8 @@ using UçakDemo.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDistributedMemoryCache();
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSession(options =>

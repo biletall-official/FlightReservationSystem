@@ -41,7 +41,7 @@
                     </div>
                     <div style="margin-left: 40px; cursor: pointer;">
                         <div style="border: 2px solid red; padding: 10px; display: inline-block; color: red;">
-                            <div onclick="validatePrice(@firstSegment.UcusID, @ucret.ToplamFiyatE, '@firstSegment.KalkisSehir', '@lastSegment.VarisSehir')">
+                            <div onclick="validatePrice(@firstSegment.UcusID, '@ucret.ToplamFiyatE', '@firstSegment.KalkisSehir', '@lastSegment.VarisSehir')">
                                 <span>@ucret?.ToplamFiyatE TL </span><br/>
                             </div>
                         </div>
@@ -90,16 +90,18 @@ else
 {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript">
-    $(document).ready(function () {
- 
-        $("#validatePriceBtn").click(function () {
-     
+        
+    //$(document).ready(function () {
+        function validatePrice(ucusID, toplamFiyatE, kalkisSehir, varisSehir) {
+            console.log(`Uçuş ID: ${ucusID}, Toplam Fiyat: ${toplamFiyatE}, Kalkış Şehri: ${kalkisSehir}, Varış Şehri: ${varisSehir}`);
             $.ajax({
                 url: '/Flight/ValidatePrice',
                 type: 'POST',
+                data:{ucusID,fiyat:toplamFiyatE,kalkisSehir,varisSehir},
                 success: function (response) {
+                    console.log(response)
                     if (response.isValid) {
-                 
+
                         window.location.href = '/PassengerInfo';
                     } else {
                         alert('Fiyat geçersiz.');
@@ -109,8 +111,8 @@ else
                     alert('Bir hata oluştu.');
                 }
             });
-        });
-    });
+        }
+    //});
     function toggleDetails(panelId) {
         var detailsPanel = document.getElementById(panelId);
         if (detailsPanel.style.display === 'none' || detailsPanel.style.display === '') {
@@ -119,7 +121,8 @@ else
             detailsPanel.style.display = 'none';
         }
     }
-</script>
+
+    </script>
 }
 <button id="validatePriceBtn">Fiyatı Doğrula ve Devam Et</button>
 

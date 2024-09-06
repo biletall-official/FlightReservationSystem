@@ -24,7 +24,9 @@ namespace UçakDemo.Models
         public int FirmaKod { get; set; }
         public string Sinif { get; set; }
         public byte DonusMu { get; set; }
-        public byte SeferKod { get; set; }
+        public int SeferID { get; set; }
+        public decimal Fiyat { get; set; }
+
 
     }
 }
