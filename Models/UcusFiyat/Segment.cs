@@ -11,6 +11,6 @@ namespace UçakDemo.Models.UcusFiyat;
         public string FirmaKod { get; set; }
         public string Sinif { get; set; }
         public int DonusMu { get; set; }
-        public int SeferKod { get; set; }
-        public int SeferNo { get; set; }
+        public string SeferKod { get; set; }
+ 
     }

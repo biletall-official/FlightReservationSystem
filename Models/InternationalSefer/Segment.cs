@@ -17,8 +17,9 @@ public class Segment
     public DateTime VarisTarih { get; set; }
     public string Vakit { get; set; }
     public string Sinif { get; set; }
-    public int SeferKod { get; set; }
     public int SeferNo { get; set; }
+
+    public string SeferKod { get; set; }
     public int KalanKoltukSayi { get; set; }
 
     public string UcusTuru { get; set; } = "Yurtdışı";

@@ -129,7 +129,7 @@ public class FlightController : Controller
                     Sinif = s.Sinif,
                     DonusMu = s.DonusMu,
                     SeferKod = s.SeferKod,
-                    SeferNo = s.SeferNo,
+                    
                 }).ToList(),
 
             });

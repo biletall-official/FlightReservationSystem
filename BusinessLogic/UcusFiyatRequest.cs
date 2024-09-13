@@ -12,7 +12,7 @@ namespace UçakDemo.Models
         public List<Segment> Segments { get; set; }
 
         public int FirmaNo { get; set; }
-        public byte? YetiskinSayi { get; set; }
+        public int YetiskinSayi { get; set; }
         public byte? CocukSayi { get; set; }
         public byte? BebekSayi { get; set; }
         public byte? OgrenciSayi { get; set; }

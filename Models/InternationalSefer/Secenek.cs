@@ -14,6 +14,7 @@ public class Secenek
     public string BagajP { get; set; }
     public string BagajE { get; set; }
     public string Vakit { get; set; }
+    public int YetiskinSayi { get; set; }
     public string UcusTuru { get; set; } = "Yurtdışı";
 
 
