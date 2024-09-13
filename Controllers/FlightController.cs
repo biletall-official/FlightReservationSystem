@@ -9,22 +9,36 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using UçakDemo.Models.InternationalSefer;
 using System.Net.Http.Json;
-using UçakDemo.BusinessLogic; 
+using System.Text;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
+using Newtonsoft.Json;
+using UçakDemo.BusinessLogic;
+using Segment = UçakDemo.Models.Sefer.Segment;
+
+
 namespace UçakDemo.Controllers;
 
 public class FlightController : Controller
 {
     private readonly SeferService _seferService;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IConfiguration _configuration;
+    private readonly UcusFiyatService _ucusFiyatService;
 
-    public FlightController(SeferService seferService, IHttpClientFactory httpClientFactory)
+    public FlightController(SeferService seferService, IHttpClientFactory httpClientFactory,
+        IConfiguration configuration, UcusFiyatService ucusFiyatService)
 
     {
         _seferService = seferService;
         _httpClientFactory = httpClientFactory;
+        _configuration = configuration;
+        _ucusFiyatService = ucusFiyatService;
     }
 
-    public async Task<IActionResult> Index(int YetiskinSayi,string KalkisAdi, string VarisAdi,DateTime Tarih, string UcusTuru)
+    public async Task<IActionResult> Index(int YetiskinSayi, string KalkisAdi, string VarisAdi, DateTime Tarih,
+        string UcusTuru)
     {
         if (ModelState.IsValid)
         {
@@ -39,17 +53,17 @@ public class FlightController : Controller
                     UçuşTürü = UcusTuru,
                 };
                 var seferResponse = await _seferService.GetSeferListesi(seferRequest);
-                
+                HttpContext.Session.SetObject("SeferListesi1", seferResponse);
                 var yurticiSeferListesi = new YurticiSeferListesi
                 {
                     Segmentler = seferResponse.Segmentler,
                     Secenekler = seferResponse.Secenekler
                 };
-                return View("YurticiSeferListesi",yurticiSeferListesi);
+                return View("YurticiSeferListesi", yurticiSeferListesi);
             }
             else if (UcusTuru == "Yurtdışı")
             {
-                var internationalSeferRequest = new InternationalSeferRequest()
+                var InternationalseferRequest = new InternationalSeferRequest()
                 {
                     YetiskinSayi = (byte)YetiskinSayi,
                     KalkisAdi = KalkisAdi,
@@ -57,27 +71,21 @@ public class FlightController : Controller
                     Tarih = Tarih,
                     UcusTuru = UcusTuru,
                 };
-                var internationalSeferResponse = await _seferService.GetInternationalSeferler(internationalSeferRequest);
-                if (internationalSeferResponse == null ||
-                    internationalSeferResponse.InternationalSegmentler == null ||
-                    !internationalSeferResponse.InternationalSegmentler.Any())
-                {
-                 
-                    ModelState.AddModelError("", "Sefer bulunamadı.");
-                    return View("Error");
-                }
-                
+                var seferResponseYurtDisi = await _seferService.GetInternationalSeferler(InternationalseferRequest);
+                HttpContext.Session.SetObject("SeferListesi", seferResponseYurtDisi);
                 var yurtdisiSeferListesi = new YurtdisiSeferListesi
                 {
-                    InternationalSegmentler = internationalSeferResponse.InternationalSegmentler,
-                    InternationalSecenekler = internationalSeferResponse.InternationalSecenekler
+                    InternationalSegmentler = seferResponseYurtDisi.InternationalSegmentler,
+                    InternationalSecenekler = seferResponseYurtDisi.InternationalSecenekler
                 };
-                HttpContext.Session.SetObject("SelectedSefer", internationalSeferResponse);
                 return View("YurtdisiSeferListesi", yurtdisiSeferListesi);
+
             }
         }
+
         return View("Error");
     }
+
     public IActionResult Error()
     {
         var errorModel = new ErrorViewModel
@@ -86,84 +94,93 @@ public class FlightController : Controller
         };
         return View(errorModel);
     }
-    [HttpPost]
-    public async Task<IActionResult> InternationalFlightSearch(InternationalSeferRequest request)
-    {
-        var internationalSeferResponse = await _seferService.GetInternationalSeferler(request);
 
-        if (internationalSeferResponse == null || 
-            internationalSeferResponse.InternationalSegmentler == null || 
-            !internationalSeferResponse.InternationalSegmentler.Any())
-        {
-            ModelState.AddModelError("", "Sefer bulunamadı.");
-            return View("Error");
-        }
 
-        return View("InternationalFlightList", internationalSeferResponse);
-    }
-    [HttpGet]
-    public async Task<IActionResult> Search(FlightSearchModel model)
+    [HttpPost("Flight/ValidatePrice/{ucusID}/{ToplamFiyatE}")]
+    public async Task<IActionResult> ValidatePrice([FromRoute] int ucusID, [FromRoute] decimal ToplamFiyatE)
     {
-        if (ModelState.IsValid)
-        {
-            var seferRequest = new SeferRequest()
+        var selectedSefer = HttpContext.Session.GetObject<YurtdisiSeferListesi>("SeferListesi");
+
+        var selectedSegments = selectedSefer.InternationalSegmentler.Where(s => s.UcusID == ucusID).ToList();
+
+        var SecenekID = selectedSegments.FirstOrDefault().SecenekID;
+        var selectedSeceneks = selectedSefer.InternationalSecenekler.Where(s => s.ID == SecenekID).ToList();
+        decimal toplam = 0;
+       
+            var flightServiceClient = new FlightServiceClient(_httpClientFactory, _configuration);
+            var soapResponse = await flightServiceClient.FiyatCek(new()
             {
-                KalkisAdi = model.KalkisAdi,
-                VarisAdi = model.VarisAdi,
-                Tarih = model.Tarih,
-                YetiskinSayi = (byte)model.YetiskinSayi,
-            };
+                FirmaNo = selectedSeceneks.FirstOrDefault().FirmaNo,
+                YetiskinSayi = 1,
+                CocukSayi = 0,
+                BebekSayi = 0,
+                OgrenciSayi = 0,
+                YasliSayi = 0,
+                AskerSayi = 0,
+                GencSayi = 0,
+                Segments = selectedSegments.Select(s=>new Models.UcusFiyat.Segment
+                {
+                    Kalkis = s.KalkisKod,
+                    Varis = s.VarisKod,
+                    KalkisTarih = s.KalkisTarih,
+                    VarisTarih = s.VarisTarih,
+                    UcusNo = s.UcusID,
+                    FirmaKod = s.HavaYoluKod,
+                    Sinif = s.Sinif,
+                    DonusMu = s.DonusMu,
+                    SeferKod = s.SeferKod,
+                    SeferNo = s.SeferNo,
+                }).ToList(),
 
-            var seferResponse = await _seferService.GetSeferListesi(seferRequest);
-            //HttpContext.Session.SetObject("SelectedSefer", seferResponse);
+            });
+            toplam += ParseUcusFiyatResponse(soapResponse).ToplamBiletFiyati;
+       
 
-            return View("SeferListesi", seferResponse);
+        if (toplam != ToplamFiyatE)
+        {
+            HttpContext.Session.SetObject("DogrulananFiyat", toplam);
+            return View("Index");
         }
-        return View("Index", model);
+        return RedirectToAction("PassengerInfo", "Flight");
+
     }
 
-    [HttpPost]
-    public async Task<IActionResult> ValidatePrice(int ucusID,decimal fiyat)
+    private UcusFiyatResponse ParseUcusFiyatResponse(string responseXml)
     {
-        var selectedSefer = HttpContext.Session.GetObject<Segment>("SelectedSefer");
-        if (selectedSefer == null)
+        try
         {
-            return Json(new { isValid = false });
+            var serializer = new XmlSerializer(typeof(UcusFiyatResponse));
+            using (var reader = new StringReader(responseXml))
+            {
+                return (UcusFiyatResponse)serializer.Deserialize(reader);
+            }
         }
-
-        var ucusFiyatRequest = new UcusFiyatRequest
+        catch (Exception ex)
         {
-            SeferID = ucusID,
-            Fiyat = fiyat, 
-            
-        };
-
-        var client = _httpClientFactory.CreateClient("FlightServiceClient");
-        var response = await client.PostAsJsonAsync("/api/flight/price", ucusFiyatRequest);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var fiyatVeKurallar = await response.Content.ReadFromJsonAsync<FiyatVeKurallarResponse>();
-            HttpContext.Session.SetObject("FiyatVeKurallar", fiyatVeKurallar);
-            return Json(new { isValid = true });
-        }
-        else
-        {
-            return Json(new { isValid = false });
+            return null;
         }
     }
-
-    [HttpPost]
-    public IActionResult SelectFlight(int seferID)
-    {
-        HttpContext.Session.SetInt32("SeferID", seferID);
-        if (seferID == null)
-        {
-            return RedirectToAction("ValidatePrice");
-        }
-        return View();
-    }
- 
-
-
+    
+    //[HttpPost]
+    // public async Task<IActionResult> GetYasKurallar(int tasiyiciFirmaNo){
+    //     var requestXml = $"<TasiyiciFirmaYolcuYasKurallar><TasiyiciFirmaNo>{tasiyiciFirmaNo}</TasiyiciFirmaNo></TasiyiciFirmaYolcuYasKurallar>";
+    //     var client = _httpClientFactory.CreateClient("FlightServiceClient");
+    //     var content = new StringContent(requestXml, Encoding.UTF8, "text/xml");var response = await client.PostAsync("/wstest/service.asmx", content);
+    //     var responseContent = await response.Content.ReadAsStringAsync();
+    //     if (response.IsSuccessStatusCode){
+    //         try
+    //         {
+    //             var yasKurallarResponse = DeserializeXml<TasiyiciFirmaYolcuYasKurallar>(responseContent);
+    //             return Json(new { isValid = true, data = yasKurallarResponse });
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             return Json(new { isValid = false, errorMessage = ex.Message });
+    //         }
+    //         
+    //     }else{
+    //         var statusCode = (int)response.StatusCode;
+    //         var reasonPhrase = response.ReasonPhrase;
+    //         return Json(new { isValid = false, statusCode, reasonPhrase });
+    //     }}
 }

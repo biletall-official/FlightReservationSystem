@@ -1,18 +1,18 @@
 namespace UçakDemo.BusinessLogic;
 
+
 public class UcusFiyatResponse
 {
-        public int UcusID { get; set; }
-        public int SecenekID { get; set; }
-        public decimal FiyatP { get; set; }
-        public decimal FiyatE { get; set; }
-        public decimal FiyatB { get; set; }
-        public decimal ServisUcretP { get; set; }
-        public decimal ServisUcretE { get; set; }
-        public decimal ServisUcretB { get; set; }
-        public decimal ToplamFiyatP { get; set; }
-        public decimal ToplamFiyatE { get; set; }
-        public string BagajP { get; set; }
-        public string BagajE { get; set; }
+        public decimal ToplamBiletFiyati { get; set; }
+        public decimal ToplamNetBiletFiyati { get; set; }
+        public decimal ToplamVergi { get; set; }
+        public decimal ToplamServisUcret { get; set; }
+        public decimal ToplamMinServisUcret { get; set; }
+        public int ToplamYolcuSayisi { get; set; }
+        public decimal YetiskinNetFiyat { get; set; }
+        public decimal YetiskinVergi { get; set; }
+        public decimal YetiskinServisUcret { get; set; }
+        public decimal YetiskinMinServisUcret { get; set; }
+
 
 }

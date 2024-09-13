@@ -27,6 +27,8 @@ builder.Services.AddHttpClient("FlightServiceClient", (client) =>
 builder.Services.AddTransient<HavaNoktaService>();
 builder.Services.AddTransient<FlightServiceClient>();
 builder.Services.AddTransient<SeferService>();
+builder.Services.AddTransient<UcusFiyatService>();
+
 
 var app = builder.Build();
 

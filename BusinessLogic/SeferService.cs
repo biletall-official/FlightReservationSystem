@@ -86,6 +86,7 @@ namespace UçakDemo.Services
                     {
                         ID = int.Parse(segmentElement.Element("ID")?.Value),
                         SecenekID = int.Parse(segmentElement.Element("SecenekID")?.Value),
+                        UcusID = int.Parse(segmentElement.Element("UcusID")?.Value ?? "0"),
                         HavaYolu = segmentElement.Element("Firma")?.Value,
                         SeferNo = segmentElement.Element("SeferNo")?.Value,
                         KalkisKod = segmentElement.Element("Kalkis")?.Value,
@@ -142,6 +143,7 @@ namespace UçakDemo.Services
                             VFiyat = decimal.Parse(seferElement.Element("VFiyat")?.Value,new CultureInfo("en-US")),
                             NFiyat = decimal.Parse(seferElement.Element("NFiyat")?.Value,new CultureInfo("en-US")),
                             Vakit = seferElement.Element("Vakit")?.Value,
+                           
 
                         };
                         Internationalsefer.InternationalSecenekler.Add(Internationalsecenek);
@@ -173,12 +175,11 @@ namespace UçakDemo.Services
                             Vakit = segmentElement.Element("Vakit")?.Value,
                             Sinif = segmentElement.Element("Sinif").Value,
                             KalanKoltukSayi = int.Parse(segmentElement.Element("KalanKoltukSayi")?.Value),
+                            SeferKod = int.Parse(segmentElement.Element("SeferKod")?.Value),
                             SeferNo = int.Parse(segmentElement.Element("SeferNo")?.Value),
                             UcusSuresi = int.Parse(segmentElement.Element("UcusSuresi")?.Value),
                             SinifTip = segmentElement.Element("SinifTip")?.Value,
                             ToplamSeyahatSuresi = int.Parse(segmentElement.Element("ToplamSeyahatSuresi")?.Value),
-   
-                            
                         };
                         Internationalsefer.InternationalSegmentler.Add(Internationalsegment);
                     }
@@ -201,6 +202,50 @@ namespace UçakDemo.Services
                 }
                 return Internationalsefer;
             }
+            
         
     };
+    public class UcusFiyatService
+    {
+        private readonly FlightServiceClient _client;
+        
+        public UcusFiyatService(FlightServiceClient client)
+        {
+            _client = client;
+        }
+
+        public async Task<UcusFiyatResponse> GetFiyatCek(UcusFiyatRequest ucusFiyatRequest)
+        {
+            string xmlResponse = await _client.FiyatCek(ucusFiyatRequest);
+            var ucusFiyat = ParseUcusFiyat(xmlResponse);
+            return ucusFiyat;
+        }
+
+        private UcusFiyatResponse ParseUcusFiyat(string xml)
+        {
+            var element = XElement.Parse(xml);
+            var ucusFiyat = new UcusFiyatResponse();
+
+            try
+            {
+                ucusFiyat.ToplamBiletFiyati = decimal.Parse(element.Element("ToplamBiletFiyati")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.ToplamNetBiletFiyati = decimal.Parse(element.Element("ToplamNetBiletFiyati")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.ToplamVergi = decimal.Parse(element.Element("ToplamVergi")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.ToplamServisUcret = decimal.Parse(element.Element("ToplamServisUcret")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.ToplamMinServisUcret = decimal.Parse(element.Element("ToplamMinServisUcret")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.ToplamYolcuSayisi = int.Parse(element.Element("ToplamYolcuSayisi")?.Value ?? "0");
+                ucusFiyat.YetiskinNetFiyat = decimal.Parse(element.Element("YetiskinNetFiyat")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.YetiskinVergi = decimal.Parse(element.Element("YetiskinVergi")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.YetiskinServisUcret = decimal.Parse(element.Element("YetiskinServisUcret")?.Value, CultureInfo.InvariantCulture);
+                ucusFiyat.YetiskinMinServisUcret = decimal.Parse(element.Element("YetiskinMinServisUcret")?.Value, CultureInfo.InvariantCulture);
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Parsing error: {ex.Message}");
+            }
+
+            return ucusFiyat;
+        }
+    }
 }

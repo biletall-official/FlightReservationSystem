@@ -4,7 +4,9 @@ using System.Text;
 using System.Text.Json;
 using System.Xml.Serialization;
 using Microsoft.Extensions.Configuration;
+using UçakDemo.BusinessLogic;
 using UçakDemo.Models;
+using UçakDemo.Models.UcusFiyat;
 using UçakDemo.Services;
 
 
@@ -129,7 +131,64 @@ namespace ucakdemo.Services
             var readAsStringAsync = await response.Content.ReadAsStringAsync();
             return readAsStringAsync;
         }
+        public async Task<string> FiyatCek(UcusFiyatRequest UcusFiyatRequest)
+        {
+            var kullaniciAdi = _configuration["BiletallService:KullaniciAdi"];
+            var sifre = _configuration["BiletallService:Sifre"];
 
+            var soapRequest = $@"<?xml version=""1.0"" encoding=""utf-8""?>
+                <soap:Envelope xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"" xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:soap=""http://schemas.xmlsoap.org/soap/envelope/"">
+                    <soap:Body>
+                        <XmlIslet xmlns=""http://tempuri.org/"">
+                            <xmlIslem>
+                                <UcusFiyat xmlns="""">
+	                                <FirmaNo>1100</FirmaNo>
+	                                {SegmentXMLolustur(UcusFiyatRequest.Segments)}
+	                                <YetiskinSayi>{UcusFiyatRequest.YetiskinSayi}</YetiskinSayi>
+	                                <CocukSayi>{UcusFiyatRequest.CocukSayi}</CocukSayi>
+	                                <BebekSayi>{UcusFiyatRequest.BebekSayi}</BebekSayi>
+	                                <OgrenciSayi>{UcusFiyatRequest.OgrenciSayi}</OgrenciSayi>
+	                                <YasliSayi>{UcusFiyatRequest.YasliSayi}</YasliSayi>
+                                      <AskerSayi>{UcusFiyatRequest.AskerSayi}</AskerSayi>
+	                                <GencSayi>{UcusFiyatRequest.GencSayi}</GencSayi>
+                                </UcusFiyat>
+                            </xmlIslem>
+                            <xmlYetki>
+                                <Kullanici xmlns="""">
+                                    <Adi>{kullaniciAdi}</Adi>
+                                    <Sifre>{sifre}</Sifre>
+                                </Kullanici>
+                            </xmlYetki>
+                        </XmlIslet>
+                    </soap:Body>
+                </soap:Envelope>";
+
+            var content = new StringContent(soapRequest, System.Text.Encoding.UTF8, "text/xml");
+            var response = await _httpClient.PostAsync("/wstest/service.asmx", content);
+            return await response.Content.ReadAsStringAsync();
+        }
+        public string SegmentXMLolustur(List<Segment> segments)
+        {
+            var sonuc = string.Empty;
+            var index = 1;
+            foreach (var segment in segments)
+            {
+                sonuc += $@" <Segment{index}>
+		                                <Kalkis>{segment.Kalkis}</Kalkis>
+		                                <Varis>{segment.Varis}</Varis>
+		                                <KalkisTarih>{segment.KalkisTarih:yyyy-MM-ddTHH:mm:ss}</KalkisTarih>
+		                                <VarisTarih>{segment.VarisTarih:yyyy-MM-ddTHH:mm:ss}</VarisTarih>
+		                                <UcusNo>{segment.UcusNo}</UcusNo>
+		                                <FirmaKod>{segment.FirmaKod}</FirmaKod>
+		                                <Sinif>{segment.Sinif}</Sinif>
+		                                <DonusMu>{segment.DonusMu}</DonusMu>
+                                            <SeferKod>{segment.SeferKod}</SeferKod>
+	                                </Segment{index}>";
+                index++;
+            }
+
+            return sonuc;
+        }
     }
 }
 

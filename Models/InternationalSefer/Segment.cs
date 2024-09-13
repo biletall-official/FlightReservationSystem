@@ -17,13 +17,16 @@ public class Segment
     public DateTime VarisTarih { get; set; }
     public string Vakit { get; set; }
     public string Sinif { get; set; }
+    public int SeferKod { get; set; }
     public int SeferNo { get; set; }
     public int KalanKoltukSayi { get; set; }
 
     public string UcusTuru { get; set; } = "Yurtdışı";
     public int UcusSuresi { get; set; }
+    public byte YetiskinSayi { get; set; }
     public int ToplamSeyahatSuresi { get; set; }
+    public int DonusMu { get; set; } = 1;
     public string SinifTip { get; set; }
-    public decimal Fiyat { get; set; }
+
   
 }

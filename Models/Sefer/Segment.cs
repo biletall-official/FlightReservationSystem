@@ -4,6 +4,7 @@ public class Segment
 {
     public int ID { get; set; } = 1000;
     public int SecenekID { get; set; }
+    public int UcusID { get; set; }
     public string HavaYolu { get; set; }
     public string SeferNo { get; set; }
     public string KalkisKod { get; set; }

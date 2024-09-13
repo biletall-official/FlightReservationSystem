@@ -14,7 +14,6 @@
             var ucret = Model.InternationalSecenekler.FirstOrDefault(s => s.ID == firstSegment.SecenekID);
             <div class="card"style="padding: 20px; min-height: 100px;">
                 
-                @* <p>TK-VF </p> *@
                 <div style="display: flex; align-items: center;">
                     <div style="margin-right: 10px;">
                         <div>@string.Join('-', ucus.Select(segment => segment.HavaYolu))</div>
@@ -41,7 +40,7 @@
                     </div>
                     <div style="margin-left: 40px; cursor: pointer;">
                         <div style="border: 2px solid red; padding: 10px; display: inline-block; color: red;">
-                            <div onclick="validatePrice(@firstSegment.UcusID, '@ucret.ToplamFiyatE', '@firstSegment.KalkisSehir', '@lastSegment.VarisSehir')">
+                            <div onclick="validatePrice(@firstSegment.UcusID, '@ucret.ToplamFiyatE')"> 
                                 <span>@ucret?.ToplamFiyatE TL </span><br/>
                             </div>
                         </div>
@@ -90,29 +89,36 @@ else
 {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script type="text/javascript">
-        
-    //$(document).ready(function () {
-        function validatePrice(ucusID, toplamFiyatE, kalkisSehir, varisSehir) {
-            console.log(`Uçuş ID: ${ucusID}, Toplam Fiyat: ${toplamFiyatE}, Kalkış Şehri: ${kalkisSehir}, Varış Şehri: ${varisSehir}`);
+
+        function validatePrice(ucusID, toplamFiyatE) {
+            //console.log(`Uçuş ID: ${ucusID}, Toplam Fiyat: ${toplamFiyatE}, kalkış: ${KalkisSehir}, varış: ${VarisSehir}`);
             $.ajax({
-                url: '/Flight/ValidatePrice',
+                url: 'Flight/ValidatePrice/'+ ucusID+"/" + toplamFiyatE,
                 type: 'POST',
-                data:{ucusID,fiyat:toplamFiyatE,kalkisSehir,varisSehir},
                 success: function (response) {
                     console.log(response)
-                    if (response.isValid) {
+                    sessionStorage.setItem("ucusID", toplamFiyatE);
+                    let expectedToplamBiletFiyati = parseFloat(toplamFiyatE);
+                    let fiyatDogru = (response.ToplamBiletFiyati === expectedFiyat);
 
-                        window.location.href = '/PassengerInfo';
+                    if (fiyatDogru) {
+                
+                        sessionStorage.setItem("ucusID", ucusID);
+                        sessionStorage.setItem("ToplamBiletFiyati", toplamFiyatE);
+                        
+                        window.location.href = '@Url.Action("PassengerInfo")';
                     } else {
-                        alert('Fiyat geçersiz.');
+                     
+                        console.error('Fiyat doğrulama başarısız.');
                     }
                 },
-                error: function () {
+                error: function (xhr, status, error) {
+                    console.error('Bir hata oluştu:', error);
                     alert('Bir hata oluştu.');
                 }
             });
         }
-    //});
+
     function toggleDetails(panelId) {
         var detailsPanel = document.getElementById(panelId);
         if (detailsPanel.style.display === 'none' || detailsPanel.style.display === '') {
